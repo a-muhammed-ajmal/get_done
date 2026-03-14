@@ -430,27 +430,35 @@ interface AppState {
 | No versioning migration | Version 1 only, no upgrade logic |
 
 ### Database / Backend
-**Status: CONNECTED — Supabase (PostgreSQL)**
+**Status: IMPLEMENTED — Requires Supabase Setup**
 
 | Detail | Value |
 |--------|-------|
 | Provider | Supabase (free tier) |
-| Project URL | `https://vjcsqnzpqcdfguqezvop.supabase.co` |
-| Credentials file | `.env` (gitignored — `VITE_SUPABASE_URL`, `VITE_SUPABASE_KEY`) |
+| Project URL | `https://vjcsqnzpqcdfguqezvop.supabase.co` (example — user must create their own) |
+| Credentials file | `.env` (created — needs user configuration) |
 | Client library | `@supabase/supabase-js@^2.99.1` |
 | Client module | `src/lib/supabase.ts` |
 | Auth | Supabase Auth (email + password) |
 
-**Sync strategy:**
+**Setup Required:**
+1. Create account at https://supabase.com
+2. Create new project
+3. Go to Settings → API → copy Project URL and anon/public key
+4. Update `.env` file with your credentials
+5. Run the SQL schema in Supabase SQL Editor
+
+**Sync strategy (once configured):**
 - Zustand `persist` (localStorage) remains as offline cache
 - Every CRUD action fires a fire-and-forget Supabase upsert/delete after updating local state
 - On sign-in: `loadFromSupabase(userId)` pulls all user data from Supabase (authoritative source)
 - On first sign-up (no Supabase data): existing local data bulk-migrated via `migrateLocalDataToSupabase()`
 - `partialize` in persist config excludes `userId` and `isAuthLoading` from localStorage
 
-**New files:**
+**Implementation files:**
 - `src/lib/supabase.ts` — Supabase client, type converters (camelCase ↔ snake_case), sync helpers
 - `src/components/AuthView.tsx` — Email/password sign-in / sign-up screen
+- `.env` — Environment variables (gitignored)
 
 ---
 
@@ -1237,14 +1245,12 @@ All changes to the application must be recorded here.
 | Date | Version | Changed By | Description |
 |------|---------|------------|-------------|
 | 2026-03-14 | 1.0.0 | Initial Analysis | APP_SPEC.md created. Full codebase analysis documented. All types, store, components, views, bugs, and roadmap captured. |
-<<<<<<< HEAD
 | 2026-03-14 | 1.1.0 | AI Agent | Changed primary color from red (`#dc4c3e`) to purple (`#800080`) in `tailwind.config.js`. Updated §1 and §10 to reflect new color. Added full Supabase schema design to §6 (6 tables, RLS policies, indexes, column mapping, data-safety rules). Updated §12 Phase 5 roadmap with implementation steps. No backend code implemented — awaiting user-provided Supabase credentials. |
 | 2026-03-14 | 1.2.0 | AI Agent | Implemented Supabase cloud sync. Installed `@supabase/supabase-js@^2.99.1`. Created `src/lib/supabase.ts` (client, camelCase↔snake_case converters, fire-and-forget sync helpers, bulk migration). Created `src/components/AuthView.tsx` (email/password sign-in/sign-up). Updated `src/store/useStore.ts`: added `userId`, `isAuthLoading`, `setUserId`, `setAuthLoading`, `loadFromSupabase`, `signOut`; all CRUD actions now sync to Supabase; `partialize` excludes auth state from localStorage. Updated `src/App.tsx`: auth gate (loading spinner → AuthView → main app), session check on mount, `onAuthStateChange` listener. Updated `vite.config.ts` PWA `theme_color` to `#800080`. Created `.env` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` (gitignored). Updated §2, §6 to reflect new status. |
 | 2026-03-14 | 1.3.0 | AI Agent | Added §14 Agent Task Workflow & To-Do Checklist. Defines mandatory to-do list creation, step-by-step end-of-task checklist (git push to main, SQL schema output, customer report format). Renumbered §14→§15 (Git) and §15→§16 (Change Log). Updated TOC accordingly. No code changes — spec-only update. |
 | 2026-03-14 | 1.4.0 | AI Agent | Added theme switching: System Default / Light / Dark. Added `ThemeMode` type to `src/types/index.ts`. Added `theme: ThemeMode` + `setTheme` to Zustand store (persisted). Updated `tailwind.config.js` surface colors to use CSS custom properties (`rgb(var(--surface-N) / <alpha-value>)`) for full opacity modifier support. Updated `src/index.css` with `:root` (light) and `:root.dark` (dark) CSS variable blocks; fixed body text, scrollbar, and checkbox hover to be theme-aware. Updated `src/App.tsx` to apply `dark` class to `<html>` element and listen for `prefers-color-scheme` changes in System mode. Updated `index.html` with FOUC-prevention inline script and moved `dark` class to `<html>`. Added 3-button theme toggle (Monitor/Sun/Moon) to `Sidebar.tsx` footer. Fixed `text-white` → `text-surface-50` in `TaskItem`, `TaskEditor`, `AuthView`, `PomodoroView`, `MatrixView`, `HabitsView`, `SearchView`, `ProjectView`, `Sidebar` (on non-colored backgrounds). Updated §1, §4, §5, §10, §12 in APP_SPEC.md. |
-=======
 | 2026-03-15 | 1.1.0 | AI Agent | **Mobile theme-color fix**: Changed `theme-color` meta and PWA manifest from `#dc4c3e` to `#171717` to match dark app background. **TaskItem redesign**: Removed always-visible edit/delete icons; unified 3-dot popup menu on all screen sizes with Edit, Duplicate, Move to project, and Delete options. **TaskEditor enhancements**: Added due time picker, assignee field, file attachments (base64), reminder (date+time), recurring task config (daily/weekly/monthly/yearly with interval), and sub-tasks section. **New types**: Added `Attachment` and `Reminder` interfaces. **New Task fields**: `attachments`, `reminder`, `assignee`. **New store actions**: `duplicateTask`, `moveTask`. |
->>>>>>> 5991ac7 (v1.1.0: TaskItem popup menu, TaskEditor enhancements, mobile theme fix)
+| 2026-03-15 | 1.2.1 | AI Agent | Created `.env` template file with placeholder Supabase credentials. Updated §6 Database/Backend status to "IMPLEMENTED — Requires Supabase Setup" with setup instructions. Updated Change Log. |
 
 ---
 
