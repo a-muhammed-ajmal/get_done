@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Light mode (default) ───────────────────────── */
+:root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  color-scheme: light;
+
+  /* surface RGB triplets — light mode (inverted scale) */
+  --surface-50:  23 23 23;       /* near-black text          */
+  --surface-100: 38 38 38;
+  --surface-200: 64 64 64;
+  --surface-300: 85 85 85;
+  --surface-400: 115 115 115;    /* muted text               */
+  --surface-500: 154 154 154;
+  --surface-600: 204 204 204;
+  --surface-700: 224 224 224;    /* hover bg / borders       */
+  --surface-800: 255 255 255;    /* cards / sidebar bg       */
+  --surface-900: 240 240 240;    /* main app background      */
+}
+
+/* ── Dark mode ──────────────────────────────────── */
+:root.dark {
+  color-scheme: dark;
+
+  /* surface RGB triplets — dark mode (original values) */
+  --surface-50:  250 250 250;    /* near-white text          */
+  --surface-100: 245 245 245;
+  --surface-200: 229 229 229;
+  --surface-300: 212 212 212;
+  --surface-400: 163 163 163;    /* muted text               */
+  --surface-500: 115 115 115;
+  --surface-600: 82 82 82;
+  --surface-700: 45 45 45;       /* hover bg / borders       */
+  --surface-800: 30 30 30;       /* cards / sidebar bg       */
+  --surface-900: 23 23 23;       /* main app background      */
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  @apply bg-surface-900 text-surface-50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(var(--surface-600)); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--surface-500)); }
+
+/* Animations */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Task checkbox */
+.task-checkbox {
+  @apply w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-200;
+}
+
+.task-checkbox:hover {
+  background-color: rgb(var(--surface-50) / 0.1);
+}
+
+.task-checkbox.completed {
+  @apply bg-surface-600 border-surface-600;
+}
+
+/* Swipe actions */
+.swipe-container {
+  touch-action: pan-y;
+}
+
+/* Priority indicator */
+.priority-dot {
+  @apply w-2 h-2 rounded-full flex-shrink-0;
+}
+
+/* Bottom nav safe area */
+.bottom-nav {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black/60 z-40;
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Habit completion ring */
+.habit-ring {
+  transition: stroke-dashoffset 0.5s ease-out;
+}
+
+/* Pomodoro timer */
+.timer-circle {
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* Input styles */
+input, textarea, select {
+  @apply bg-transparent outline-none;
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgb(var(--surface-400) / 0.5);
+}

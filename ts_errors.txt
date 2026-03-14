@@ -1,0 +1,1 @@
+src/lib/supabase.ts(38,3): error TS2739: Type '{ id: string; title: string; description: string; completed: boolean; priority: Priority; projectId: string | null; labelIds: string[]; dueDate: string | null; dueTime: string | null; ... 6 more ...; gtdContext: GtdContext | null; }' is missing the following properties from type 'Task': attachments, reminder, assignee
