@@ -90,7 +90,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/ajmal-repo/get_done.git
+git clone https://github.com/a-muhammed-ajmal/get_done.git
 cd get-done
 
 # Install dependencies

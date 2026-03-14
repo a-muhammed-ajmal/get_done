@@ -1129,7 +1129,7 @@ After the main work is done, the agent MUST go through the following checklist *
 [ ] 3. SQL schemas provided (see §14 SQL Schema Output Requirement below)
 [ ] 4. Files staged:  git add <changed files only — never git add -A blindly>
 [ ] 5. Committed:     git commit -m "..." (with Co-Authored-By footer)
-[ ] 6. Pushed:        git push origin main   →  https://github.com/ajmal-repo/get_done
+[ ] 6. Pushed:        git push origin main   →  https://github.com/a-muhammed-ajmal/get_done
 [ ] 7. Confirm push succeeded (no errors)
 [ ] 8. Report completion to the user (see §14 Customer Report Format below)
 ```
@@ -1140,7 +1140,7 @@ After the main work is done, the agent MUST go through the following checklist *
 > ```
 > git push origin main
 > ```
-> Remote URL: `https://github.com/ajmal-repo/get_done`
+> Remote URL: `https://github.com/a-muhammed-ajmal/get_done`
 
 ---
 
@@ -1188,7 +1188,7 @@ After pushing to GitHub and providing SQL (if needed), the agent MUST post a com
 
 **Git:**
 - Committed: "<commit message>"
-- Pushed to: main → https://github.com/ajmal-repo/get_done
+- Pushed to: main → https://github.com/a-muhammed-ajmal/get_done
 
 **Supabase SQL Required:** Yes / No
 (If yes — SQL block is above)
@@ -1204,7 +1204,7 @@ After pushing to GitHub and providing SQL (if needed), the agent MUST post a com
 
 | Field | Value |
 |-------|-------|
-| Remote URL | `https://github.com/ajmal-repo/get_done` |
+| Remote URL | `https://github.com/a-muhammed-ajmal/get_done` |
 | Default branch | `main` |
 | Initialized | 2026-03-14 |
 
@@ -1225,7 +1225,7 @@ git push origin main      ← always push to main
 - Never push `node_modules/`, `dist/`, `.claude/`
 - Commit message must describe what changed and why
 - Always include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` in commit footer
-- If the repo has no remote yet: `git remote add origin https://github.com/ajmal-repo/get_done.git`
+- If the repo has no remote yet: `git remote add origin https://github.com/a-muhammed-ajmal/get_done.git`
 - If the local repo is not initialized: `git init && git checkout -b main` first
 
 ---
