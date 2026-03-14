@@ -430,23 +430,22 @@ interface AppState {
 | No versioning migration | Version 1 only, no upgrade logic |
 
 ### Database / Backend
-**Status: IMPLEMENTED — Requires Supabase Setup**
+**Status: CREDENTIALS CONFIGURED — Database Schema Required**
 
 | Detail | Value |
 |--------|-------|
 | Provider | Supabase (free tier) |
-| Project URL | `https://vjcsqnzpqcdfguqezvop.supabase.co` (example — user must create their own) |
-| Credentials file | `.env` (created — needs user configuration) |
+| Project URL | `https://vjcsqnzpqcdfguqezvop.supabase.co` |
+| Credentials file | `.env` (configured with user credentials) |
 | Client library | `@supabase/supabase-js@^2.99.1` |
 | Client module | `src/lib/supabase.ts` |
 | Auth | Supabase Auth (email + password) |
 
-**Setup Required:**
-1. Create account at https://supabase.com
-2. Create new project
-3. Go to Settings → API → copy Project URL and anon/public key
-4. Update `.env` file with your credentials
-5. Run the SQL schema in Supabase SQL Editor
+**Remaining Setup:**
+1. ✅ Create Supabase account and project
+2. ✅ Configure API credentials in `.env`
+3. 🔄 **Run the SQL schema** in Supabase SQL Editor (see below)
+4. 🔄 Test authentication and data sync
 
 **Sync strategy (once configured):**
 - Zustand `persist` (localStorage) remains as offline cache
@@ -1251,6 +1250,7 @@ All changes to the application must be recorded here.
 | 2026-03-14 | 1.4.0 | AI Agent | Added theme switching: System Default / Light / Dark. Added `ThemeMode` type to `src/types/index.ts`. Added `theme: ThemeMode` + `setTheme` to Zustand store (persisted). Updated `tailwind.config.js` surface colors to use CSS custom properties (`rgb(var(--surface-N) / <alpha-value>)`) for full opacity modifier support. Updated `src/index.css` with `:root` (light) and `:root.dark` (dark) CSS variable blocks; fixed body text, scrollbar, and checkbox hover to be theme-aware. Updated `src/App.tsx` to apply `dark` class to `<html>` element and listen for `prefers-color-scheme` changes in System mode. Updated `index.html` with FOUC-prevention inline script and moved `dark` class to `<html>`. Added 3-button theme toggle (Monitor/Sun/Moon) to `Sidebar.tsx` footer. Fixed `text-white` → `text-surface-50` in `TaskItem`, `TaskEditor`, `AuthView`, `PomodoroView`, `MatrixView`, `HabitsView`, `SearchView`, `ProjectView`, `Sidebar` (on non-colored backgrounds). Updated §1, §4, §5, §10, §12 in APP_SPEC.md. |
 | 2026-03-15 | 1.1.0 | AI Agent | **Mobile theme-color fix**: Changed `theme-color` meta and PWA manifest from `#dc4c3e` to `#171717` to match dark app background. **TaskItem redesign**: Removed always-visible edit/delete icons; unified 3-dot popup menu on all screen sizes with Edit, Duplicate, Move to project, and Delete options. **TaskEditor enhancements**: Added due time picker, assignee field, file attachments (base64), reminder (date+time), recurring task config (daily/weekly/monthly/yearly with interval), and sub-tasks section. **New types**: Added `Attachment` and `Reminder` interfaces. **New Task fields**: `attachments`, `reminder`, `assignee`. **New store actions**: `duplicateTask`, `moveTask`. |
 | 2026-03-15 | 1.2.1 | AI Agent | Created `.env` template file with placeholder Supabase credentials. Updated §6 Database/Backend status to "IMPLEMENTED — Requires Supabase Setup" with setup instructions. Updated Change Log. |
+| 2026-03-15 | 1.2.2 | AI Agent | Configured Supabase credentials in `.env` file. Updated §6 Database/Backend status to "CREDENTIALS CONFIGURED — Database Schema Required". |
 
 ---
 
