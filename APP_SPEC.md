@@ -1105,6 +1105,7 @@ Tailwind config uses `rgb(var(--surface-N) / <alpha-value>)` — supports opacit
 
 > ⚠️ **MANDATORY FOR EVERY AI AGENT SESSION**
 > Follow this workflow on every task — no exceptions.
+> Always create a to-do list first, then complete everything systematically.
 
 ---
 
@@ -1114,7 +1115,8 @@ Before writing a single line of code, the agent MUST:
 
 1. Read `APP_SPEC.md` completely.
 2. Understand what already exists (read relevant files first).
-3. Create a to-do list (use `TodoWrite`) listing every step needed to complete the task.
+3. **Create a to-do list** (use `TodoWrite`) listing every step needed to complete the task.
+4. Include reminders and checklists in the to-do list always.
 
 ---
 
@@ -1123,6 +1125,7 @@ Before writing a single line of code, the agent MUST:
 - Mark each to-do item as **completed** immediately after finishing it — do not batch.
 - If a step changes the plan, update the to-do list before continuing.
 - Never skip a to-do item; if it becomes irrelevant, mark it cancelled and explain why.
+- Always maintain the to-do list as a living document throughout the task.
 
 ---
 
@@ -1143,6 +1146,7 @@ After the main work is done, the agent MUST go through the following checklist *
 
 > ⚠️ **CRITICAL — Git Push Rule:**
 > The only allowed branch is `main`. Never push to any other branch.
+> **Git push main has main branch only.**
 > Exact command every time:
 > ```
 > git push origin main
@@ -1176,6 +1180,7 @@ Rules for SQL output:
 - Group CREATE TABLE, ALTER TABLE, CREATE POLICY, and CREATE INDEX separately with comments.
 - Never assume the user has already run previous SQL — be explicit about dependencies.
 - If no Supabase changes were made, write: *No Supabase schema changes required for this task.*
+- **Always provide SQL schemas after finishing the task. If any changes are needed in Supabase, such as adding a new column, table, or policy, please provide them at the same time as a copyable code block.**
 
 ---
 
@@ -1202,6 +1207,38 @@ After pushing to GitHub and providing SQL (if needed), the agent MUST post a com
 
 **APP_SPEC.md:** Updated (§X, §Y, Change Log)
 ```
+
+---
+
+### Step 6 — To-Do List Requirements
+
+**MANDATORY:** Every agent session must start with a comprehensive to-do list that includes:
+
+1. **Task breakdown** — Every step needed to complete the request
+2. **File identification** — Which files will be read/modified
+3. **Dependency checks** — What needs to be verified first
+4. **Testing steps** — How to verify the work is correct
+5. **Documentation updates** — APP_SPEC.md sections to update
+6. **Git workflow** — Commit message, push verification
+7. **SQL requirements** — If Supabase changes are needed
+8. **Customer reporting** — Completion format checklist
+
+**Example To-Do List Structure:**
+```
+[ ] 1. Read APP_SPEC.md completely
+[ ] 2. Analyze current implementation in relevant files
+[ ] 3. Create detailed task breakdown
+[ ] 4. Implement code changes
+[ ] 5. Test functionality
+[ ] 6. Update APP_SPEC.md documentation
+[ ] 7. Stage and commit changes
+[ ] 8. Push to main branch
+[ ] 9. Verify push success
+[ ] 10. Report completion to user
+[ ] 11. Provide SQL schemas if needed
+```
+
+**REMINDER:** Always include this checklist in your to-do list and mark items complete as you go.
 
 ---
 
@@ -1251,6 +1288,7 @@ All changes to the application must be recorded here.
 | 2026-03-15 | 1.1.0 | AI Agent | **Mobile theme-color fix**: Changed `theme-color` meta and PWA manifest from `#dc4c3e` to `#171717` to match dark app background. **TaskItem redesign**: Removed always-visible edit/delete icons; unified 3-dot popup menu on all screen sizes with Edit, Duplicate, Move to project, and Delete options. **TaskEditor enhancements**: Added due time picker, assignee field, file attachments (base64), reminder (date+time), recurring task config (daily/weekly/monthly/yearly with interval), and sub-tasks section. **New types**: Added `Attachment` and `Reminder` interfaces. **New Task fields**: `attachments`, `reminder`, `assignee`. **New store actions**: `duplicateTask`, `moveTask`. |
 | 2026-03-15 | 1.2.1 | AI Agent | Created `.env` template file with placeholder Supabase credentials. Updated §6 Database/Backend status to "IMPLEMENTED — Requires Supabase Setup" with setup instructions. Updated Change Log. |
 | 2026-03-15 | 1.2.2 | AI Agent | Configured Supabase credentials in `.env` file. Updated §6 Database/Backend status to "CREDENTIALS CONFIGURED — Database Schema Required". |
+| 2026-03-15 | 1.2.3 | AI Agent | Enhanced §14 Agent Task Workflow & To-Do Checklist with mandatory to-do list creation, specific git push checkpoints ("Git push main has main branch only"), SQL schema requirements, and comprehensive workflow guidelines. Added Step 6 with detailed to-do list requirements and example structure. |
 
 ---
 
