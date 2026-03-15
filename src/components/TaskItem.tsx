@@ -4,7 +4,7 @@ import { Task, PRIORITY_COLORS } from '@/types'
 import { TaskEditor } from './TaskEditor'
 import {
   Check, Calendar, Tag, Trash2, Edit3,
-  MoreVertical, Copy, FolderOpen, Paperclip, Bell, User, Clock
+  MoreVertical, Copy, FolderOpen, Paperclip, Bell, User, Clock, Star, Sun
 } from 'lucide-react'
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns'
 
@@ -14,7 +14,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, showProject = true }: TaskItemProps) {
-  const { toggleTask, deleteTask, duplicateTask, moveTask, projects, labels } = useStore()
+  const { toggleTask, deleteTask, duplicateTask, moveTask, toggleMyDay, toggleStarred, projects, labels } = useStore()
   const [editing, setEditing] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showMoveMenu, setShowMoveMenu] = useState(false)
@@ -122,6 +122,22 @@ export function TaskItem({ task, showProject = true }: TaskItemProps) {
           </div>
         </div>
 
+        {/* Star button (visible on hover or when starred) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleStarred(task.id)
+          }}
+          title={task.isStarred ? 'Unstar' : 'Star (Important)'}
+          className={`p-1.5 rounded transition-colors ${
+            task.isStarred
+              ? 'text-yellow-400'
+              : 'text-surface-600 opacity-0 group-hover:opacity-100 hover:text-yellow-400'
+          }`}
+        >
+          <Star size={14} className={task.isStarred ? 'fill-yellow-400' : ''} />
+        </button>
+
         {/* 3-dot menu button */}
         <div className="relative" ref={menuRef}>
           <button
@@ -138,6 +154,17 @@ export function TaskItem({ task, showProject = true }: TaskItemProps) {
           {/* Popup menu */}
           {showMenu && (
             <div className="absolute right-0 top-full mt-1 w-48 bg-surface-700 rounded-lg shadow-xl py-1 z-50 animate-scale-in">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleMyDay(task.id)
+                  setShowMenu(false)
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 w-full text-sm text-surface-200 hover:bg-surface-600 transition-colors"
+              >
+                <Sun size={14} className="text-yellow-400" />
+                <span>{task.isMyDay ? 'Remove from My Day' : 'Add to My Day'}</span>
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation()

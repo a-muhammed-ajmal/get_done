@@ -34,6 +34,8 @@ export interface Task {
   attachments: Attachment[]
   reminder: Reminder | null
   assignee: string | null
+  isMyDay: boolean           // Added to My Day smart list
+  isStarred: boolean         // Starred = appears in Important view
 }
 
 export interface Project {
@@ -43,6 +45,16 @@ export interface Project {
   icon: string
   order: number
   isFavorite: boolean
+  areaId: string | null  // null = not linked to any Life Area
+  dueDate: string | null // Goal target date 'yyyy-MM-dd'
+}
+
+// Fixed Life Areas — not stored in state, defined as a constant
+export interface Area {
+  id: string
+  name: string
+  emoji: string
+  description: string
 }
 
 export interface Label {
@@ -94,7 +106,7 @@ export interface PomodoroSettings {
   autoStartWork: boolean
 }
 
-export type ViewType = 'inbox' | 'today' | 'upcoming' | 'project' | 'label' | 'habits' | 'pomodoro' | 'matrix' | 'gtd' | 'search'
+export type ViewType = 'inbox' | 'today' | 'upcoming' | 'project' | 'label' | 'habits' | 'pomodoro' | 'matrix' | 'gtd' | 'search' | 'myday' | 'important' | 'completed'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 
@@ -104,6 +116,16 @@ export const PROJECT_COLORS = [
   '#14aaf5', '#96c3eb', '#4073ff', '#884dff',
   '#af38eb', '#eb96eb', '#e05194', '#ff8d85',
   '#808080', '#b8b8b8', '#ccac93',
+]
+
+// Fixed Life Areas (Professional, Personal, Financial, Wellness, Relationship, Vision)
+export const FIXED_AREAS: Area[] = [
+  { id: 'professional', name: 'Professional', emoji: '💼', description: 'Work, career, business, and professional commitments' },
+  { id: 'personal',     name: 'Personal',     emoji: '🧑',  description: 'Personal errands, self-management, and individual responsibilities' },
+  { id: 'financial',   name: 'Financial',    emoji: '💰', description: 'Budgeting, bills, savings, investments, and money tasks' },
+  { id: 'wellness',    name: 'Wellness',     emoji: '💪', description: 'Health, fitness, habits, and self-care routines' },
+  { id: 'relationship',name: 'Relationship', emoji: '💖', description: 'Family, friends, partner, and social commitments' },
+  { id: 'vision',      name: 'Vision',       emoji: '🎯', description: 'Long-term goals, aspirations, and life planning' },
 ]
 
 export const PRIORITY_COLORS: Record<Priority, string> = {

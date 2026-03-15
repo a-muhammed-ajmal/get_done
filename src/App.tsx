@@ -14,6 +14,9 @@ import { PomodoroView } from '@/views/PomodoroView'
 import { MatrixView } from '@/views/MatrixView'
 import { GtdView } from '@/views/GtdView'
 import { SearchView } from '@/views/SearchView'
+import { MyDayView } from '@/views/MyDayView'
+import { ImportantView } from '@/views/ImportantView'
+import { CompletedView } from '@/views/CompletedView'
 
 function applyTheme(theme: ThemeMode) {
   const html = document.documentElement
@@ -97,16 +100,19 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
+      case 'myday':    return <MyDayView />
       case 'today':    return <TodayView />
       case 'inbox':    return <InboxView />
       case 'upcoming': return <UpcomingView />
+      case 'important': return <ImportantView />
+      case 'completed': return <CompletedView />
       case 'project':  return <ProjectView />
       case 'habits':   return <HabitsView />
       case 'pomodoro': return <PomodoroView />
       case 'matrix':   return <MatrixView />
       case 'gtd':      return <GtdView />
       case 'search':   return <SearchView />
-      default:         return <TodayView />
+      default:         return <MyDayView />
     }
   }
 

@@ -1,5 +1,5 @@
 # GET DONE — APPLICATION SPECIFICATION FILE
-**Version:** 1.1.0 | **Last Updated:** 2026-03-15 | **Author:** Muhammed Ajmal
+**Version:** 2.0.0 | **Last Updated:** 2026-03-15 | **Author:** Muhammed Ajmal
 
 ---
 
@@ -66,16 +66,9 @@ A unified productivity hub combining:
 - Mobile (secondary): bottom nav + sidebar drawer
 
 ### Design Philosophy
-<<<<<<< HEAD
 - Theme: System Default / Light / Dark — user-selectable (default: Dark)
 - Purple primary color (`#800080`) — action-forward design
 - Surface palette adapts via CSS custom properties (light: `#f0f0f0`–`#111`, dark: `#171717`–`#fafafa`)
-=======
-- Dark theme always on (no light mode toggle)
-- Red primary color (`#dc4c3e`) — action-forward design
-- Mobile theme-color: `#171717` (matches dark background for status bar)
-- Surface dark palette (`#171717` to `#fafafa`)
->>>>>>> 5991ac7 (v1.1.0: TaskItem popup menu, TaskEditor enhancements, mobile theme fix)
 - Minimal UI — no clutter, task-first
 - Mobile-first responsive layout
 
@@ -157,10 +150,13 @@ Get Done/
     │   └── TaskEditor.tsx         ← Modal form for create/edit task
     │
     └── views/
-        ├── TodayView.tsx          ← Overdue + today tasks
-        ├── InboxView.tsx          ← Tasks with no project
+        ├── MyDayView.tsx          ← My Day smart list (overdue + isMyDay tasks + today)
+        ├── TodayView.tsx          ← Overdue + today tasks (legacy — kept, not in main nav)
+        ├── ImportantView.tsx      ← Starred tasks (isStarred = true)
+        ├── CompletedView.tsx      ← Archive of all completed tasks grouped by date
+        ├── InboxView.tsx          ← Tasks with no project/goal
         ├── UpcomingView.tsx       ← 14-day calendar view
-        ├── ProjectView.tsx        ← Tasks by currentProjectId
+        ├── ProjectView.tsx        ← Tasks by currentProjectId (Goal view)
         ├── HabitsView.tsx         ← Habit tracker + 7-day ring history
         ├── SearchView.tsx         ← Full-text task search
         ├── MatrixView.tsx         ← Eisenhower 4-quadrant view
@@ -205,6 +201,7 @@ type GtdContext =
 type ViewType =
   | 'inbox' | 'today' | 'upcoming' | 'project'
   | 'label' | 'habits' | 'pomodoro' | 'matrix' | 'gtd' | 'search'
+  | 'myday' | 'important' | 'completed'  // New smart list views
 
 type ThemeMode = 'system' | 'light' | 'dark'
 ```
@@ -251,18 +248,32 @@ interface Task {
   attachments: Attachment[]         // ✅ File attachments (base64 in localStorage)
   reminder: Reminder | null         // ✅ Reminder date+time
   assignee: string | null           // ✅ Assigned person name
+  isMyDay: boolean                  // ✅ Added to My Day smart list (default: false)
+  isStarred: boolean                // ✅ Starred = appears in Important view (default: false)
 }
 ```
 
-### Project Interface
+### Project Interface (= Goal)
 ```typescript
 interface Project {
   id: string          // uuid v4
-  name: string        // display name
+  name: string        // display name / Goal name
   color: string       // hex color from PROJECT_COLORS
   icon: string        // emoji or icon string
   order: number       // sort order
-  isFavorite: boolean // shown at top of sidebar if true
+  isFavorite: boolean // legacy — kept for compatibility
+  areaId: string | null  // links Goal to a Life Area (null = "Other Goals")
+  dueDate: string | null // Goal target date 'yyyy-MM-dd' (optional)
+}
+```
+
+### Area Interface (Fixed — not stored in state)
+```typescript
+interface Area {
+  id: string       // one of: 'professional' | 'personal' | 'financial' | 'wellness' | 'relationship' | 'vision'
+  name: string     // display name
+  emoji: string    // area emoji icon
+  description: string
 }
 ```
 
@@ -348,7 +359,7 @@ interface AppState {
   habits: Habit[]
 
   // UI state
-  currentView: ViewType          // default: 'today'
+  currentView: ViewType          // default: 'myday'
   currentProjectId: string | null
   currentLabelId: string | null
   sidebarOpen: boolean           // default: false (controls mobile drawer)
@@ -369,6 +380,8 @@ interface AppState {
   // Actions (functions — not persisted)
   addTask, updateTask, deleteTask, toggleTask, reorderTask
   duplicateTask, moveTask
+  toggleMyDay        // toggles task.isMyDay
+  toggleStarred      // toggles task.isStarred
   addProject, updateProject, deleteProject
   addLabel, updateLabel, deleteLabel
   addHabit, updateHabit, deleteHabit, toggleHabitCompletion
@@ -689,13 +702,31 @@ No export or import functionality exists yet.
 ### Sidebar (`src/components/Sidebar.tsx`)
 **Role:** Primary navigation
 **Props:** none (reads from useStore)
-**Sections:**
-- Logo + app title
-- Search button → sets view to 'search'
-- Main nav: Inbox, Today, Upcoming
-- Collapsible "Tools": Habits, Pomodoro, Matrix, GTD
-- Collapsible "Projects": list + add new project button
-- Collapsible "Labels": list — ⚠️ label click calls `setView('label', labelId)` but LabelView does not exist
+**Sections (top to bottom):**
+1. **App logo** + "Get Done" title
+2. **User Profile pill** — shows name + "Signed in" (or Guest for local mode); hover reveals Sign Out
+3. **Search button** → sets view to `'search'`, shows `⌘K` hint
+4. **System Lists** (no section title):
+   - My Day (`'myday'`) — badge: count of `isMyDay` tasks
+   - Important (`'important'`) — badge: count of `isStarred` tasks
+   - Upcoming (`'upcoming'`) — badge: tasks with a dueDate
+   - Completed (`'completed'`) — no badge
+   - Inbox (`'inbox'`) — badge: tasks where `projectId === null`
+5. **Life Areas** (label: "LIFE AREAS" + "+ New Goal" button):
+   - 6 fixed areas listed (Professional, Personal, Financial, Wellness, Relationship, Vision)
+   - Each area is a collapsible row — click toggles Goals list beneath it
+   - Goals under each area show task count badge
+   - "Add goal" shortcut inside each expanded area
+   - Goals without `areaId` show under "OTHER GOALS" section
+6. **Tools** (collapsible section): Habits, Pomodoro, 4 Quadrants, GTD
+7. **Theme toggle** (pinned to bottom): System / Light / Dark buttons
+
+**New Goal Modal** (inline in Sidebar.tsx):
+- Goal name (text input, required)
+- Color swatch picker (all PROJECT_COLORS)
+- Life Area dropdown (all FIXED_AREAS + "No Area")
+- Target Date picker (optional)
+- Creates project via `addProject()` then navigates to it
 
 ### BottomNav (`src/components/BottomNav.tsx`)
 **Role:** Mobile-only bottom navigation
@@ -715,20 +746,22 @@ No export or import functionality exists yet.
 - Title (line-through when completed)
 - Description snippet (if exists)
 - Due date + time (red if overdue)
-- Project indicator dot (if showProject && projectId)
+- Project/Goal indicator dot (if showProject && projectId)
 - Assignee indicator (if assigned)
 - Attachment count indicator
 - Reminder indicator (bell icon)
 - Recurring indicator (↻ symbol)
 - Labels chips
-- 3-dot menu (MoreVertical) with popup containing: Edit, Duplicate, Move to (submenu with projects), Delete
+- **Star button** (⭐) — visible on hover, always visible when `isStarred: true`; toggles `isStarred` via `toggleStarred()`
+- 3-dot menu (MoreVertical) with popup: **Add to My Day**, Edit, Duplicate, Move to (submenu), Delete
 **Behavior:**
 - Click checkbox → toggleTask(id)
 - Click content area → opens TaskEditor
-- 3-dot menu → shows popup with Edit, Duplicate, Move to project, Delete
-- Move to submenu → shows all projects + Inbox option
+- Star icon → toggleStarred(id); yellow filled when starred
+- 3-dot → "Add to My Day" / "Remove from My Day" (toggleMyDay), Edit, Duplicate, Move to, Delete
+- Move to submenu → shows all goals + Inbox option
 - Overdue = `dueDate < today && !completed`
-- No always-visible edit/delete icons (removed per design)
+- No always-visible edit/delete icons (by design)
 
 ### TaskList (`src/components/TaskList.tsx`)
 **Props:** `{ tasks: Task[], showProject?: boolean, emptyMessage?: string }`
@@ -774,12 +807,37 @@ No export or import functionality exists yet.
 
 ## 8. VIEWS REFERENCE
 
+### MyDayView (`src/views/MyDayView.tsx`) ✅ NEW
+**ViewType:** `'myday'`
+**Logic:**
+- Shows overdue tasks first (dueDate < today && !completed)
+- Then tasks where `isMyDay === true && !completed` (excluding already-shown overdue)
+- Then tasks due today that are not isMyDay
+- "Add task" pre-fills dueDate with today
+- **Default view** on app load
+
+### ImportantView (`src/views/ImportantView.tsx`) ✅ NEW
+**ViewType:** `'important'`
+**Logic:**
+- Shows all tasks where `isStarred === true && !completed`
+- Shows starred count subtitle
+- "Add task" button → opens TaskEditor
+
+### CompletedView (`src/views/CompletedView.tsx`) ✅ NEW
+**ViewType:** `'completed'`
+**Logic:**
+- Shows all tasks where `completed === true`
+- Sorted by `completedAt` descending (newest first)
+- Grouped by completion date (Today / Yesterday / MMM d)
+- Empty state with icon
+
 ### TodayView (`src/views/TodayView.tsx`)
 **ViewType:** `'today'`
 **Logic:**
 - Shows tasks where `dueDate <= today`
 - Separates overdue (dueDate < today) and today (dueDate === today)
 - "Add task" pre-fills dueDate with today
+- **Note:** Legacy view, kept for compatibility. Not in main sidebar nav.
 
 ### InboxView (`src/views/InboxView.tsx`)
 **ViewType:** `'inbox'`
@@ -862,9 +920,12 @@ No export or import functionality exists yet.
 **View Map in App.tsx:**
 ```typescript
 switch (currentView) {
-  case 'today':    return <TodayView />
+  case 'myday':    return <MyDayView />      // ✅ NEW — default home
+  case 'today':    return <TodayView />       // legacy
   case 'inbox':    return <InboxView />
   case 'upcoming': return <UpcomingView />
+  case 'important': return <ImportantView /> // ✅ NEW
+  case 'completed': return <CompletedView /> // ✅ NEW
   case 'project':  return <ProjectView />
   case 'habits':   return <HabitsView />
   case 'pomodoro': return <PomodoroView />
@@ -872,7 +933,7 @@ switch (currentView) {
   case 'gtd':      return <GtdView />
   case 'search':   return <SearchView />
   // ⚠️ 'label' case is MISSING — will fall to default
-  default:         return <TodayView />  // fallback
+  default:         return <MyDayView />      // fallback
 }
 ```
 
@@ -1267,8 +1328,6 @@ git push origin main      ← always push to main
 - Always push to `main` — never create other branches unless explicitly asked
 - Never push `.env` (it is gitignored — contains Supabase credentials)
 - Never push `node_modules/`, `dist/`, `.claude/`
-- Commit message must describe what changed and why
-- Always include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` in commit footer
 - If the repo has no remote yet: `git remote add origin https://github.com/a-muhammed-ajmal/get_done.git`
 - If the local repo is not initialized: `git init && git checkout -b main` first
 
@@ -1289,6 +1348,7 @@ All changes to the application must be recorded here.
 | 2026-03-15 | 1.2.1 | AI Agent | Created `.env` template file with placeholder Supabase credentials. Updated §6 Database/Backend status to "IMPLEMENTED — Requires Supabase Setup" with setup instructions. Updated Change Log. |
 | 2026-03-15 | 1.2.2 | AI Agent | Configured Supabase credentials in `.env` file. Updated §6 Database/Backend status to "CREDENTIALS CONFIGURED — Database Schema Required". |
 | 2026-03-15 | 1.2.3 | AI Agent | Enhanced §14 Agent Task Workflow & To-Do Checklist with mandatory to-do list creation, specific git push checkpoints ("Git push main has main branch only"), SQL schema requirements, and comprehensive workflow guidelines. Added Step 6 with detailed to-do list requirements and example structure. |
+| 2026-03-15 | 2.0.0 | AI Agent | **Sidebar Redesign — Areas, Goals & Smart Lists.** Full sidebar overhaul: (1) Added User Profile pill at top showing name + signed-in status. (2) Replaced old Project/Label nav with 5 System Smart Lists: My Day, Important, Upcoming, Completed, Inbox — each with live badge counts. (3) Added Life Areas section with 6 fixed areas (Professional, Personal, Financial, Wellness, Relationship, Vision) — each expandable to reveal Goals. (4) Added Tools collapsible section (Habits, Pomodoro, 4 Quadrants, GTD). (5) Added "+ New Goal" button and modal (name, color, area, date). (6) Created new views: `MyDayView` (default home), `ImportantView`, `CompletedView`. (7) Added `isMyDay` and `isStarred` fields to `Task` type + `toggleMyDay` / `toggleStarred` store actions. (8) Added `areaId` and `dueDate` fields to `Project`/Goal type. (9) Added `Area` interface + `FIXED_AREAS` constant. (10) Added `'myday'`, `'important'`, `'completed'` to `ViewType`. (11) Updated `TaskItem` with star button (hover-visible, always visible when starred) and "Add to My Day" popup menu item. (12) Updated `supabase.ts` converters for all new fields. Files: `Sidebar.tsx`, `TaskItem.tsx`, `MyDayView.tsx`, `ImportantView.tsx`, `CompletedView.tsx`, `types/index.ts`, `store/useStore.ts`, `lib/supabase.ts`, `App.tsx`. SQL required: see Supabase schema section. |
 
 ---
 

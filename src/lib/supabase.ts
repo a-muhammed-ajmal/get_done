@@ -34,6 +34,8 @@ export function taskToDb(task: Task, userId: string) {
     attachments: task.attachments,
     reminder: task.reminder,
     assignee: task.assignee,
+    is_my_day: task.isMyDay,
+    is_starred: task.isStarred,
   }
 }
 
@@ -58,6 +60,8 @@ export function taskFromDb(row: DbRow): Task {
     attachments: (row.attachments as Attachment[]) || [],
     reminder: row.reminder as Reminder | null,
     assignee: row.assignee as string | null,
+    isMyDay: (row.is_my_day as boolean) ?? false,
+    isStarred: (row.is_starred as boolean) ?? false,
   }
 }
 
@@ -70,6 +74,8 @@ export function projectToDb(project: Project, userId: string) {
     icon: project.icon,
     order: project.order,
     is_favorite: project.isFavorite,
+    area_id: project.areaId,
+    due_date: project.dueDate,
   }
 }
 
@@ -81,6 +87,8 @@ export function projectFromDb(row: DbRow): Project {
     icon: row.icon as string,
     order: row.order as number,
     isFavorite: row.is_favorite as boolean,
+    areaId: (row.area_id as string | null) ?? null,
+    dueDate: (row.due_date as string | null) ?? null,
   }
 }
 

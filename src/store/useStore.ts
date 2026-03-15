@@ -48,6 +48,8 @@ interface AppState {
   updateTask: (id: string, updates: Partial<Task>) => void
   deleteTask: (id: string) => void
   toggleTask: (id: string) => void
+  toggleMyDay: (id: string) => void
+  toggleStarred: (id: string) => void
   duplicateTask: (id: string) => void
   moveTask: (id: string, projectId: string | null) => void
   reorderTask: (id: string, newOrder: number) => void
@@ -87,8 +89,8 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       tasks: [],
       projects: [
-        { id: 'default', name: 'Personal', color: '#4073ff', icon: 'user', order: 0, isFavorite: false },
-        { id: 'work', name: 'Work', color: '#db4035', icon: 'briefcase', order: 1, isFavorite: false },
+        { id: 'default', name: 'Personal', color: '#4073ff', icon: 'user', order: 0, isFavorite: false, areaId: 'personal', dueDate: null },
+        { id: 'work', name: 'Work', color: '#db4035', icon: 'briefcase', order: 1, isFavorite: false, areaId: 'professional', dueDate: null },
       ],
       labels: [
         { id: 'l1', name: 'urgent', color: '#800080' },
@@ -96,7 +98,7 @@ export const useStore = create<AppState>()(
         { id: 'l3', name: 'quick-win', color: '#299438' },
       ],
       habits: [],
-      currentView: 'today',
+      currentView: 'myday',
       currentProjectId: null,
       currentLabelId: null,
       sidebarOpen: false,
@@ -181,6 +183,8 @@ export const useStore = create<AppState>()(
           attachments: partial.attachments || [],
           reminder: partial.reminder || null,
           assignee: partial.assignee || null,
+          isMyDay: partial.isMyDay ?? false,
+          isStarred: partial.isStarred ?? false,
         }
         set((s) => ({ tasks: [...s.tasks, task] }))
         const { userId } = get()
@@ -214,6 +218,28 @@ export const useStore = create<AppState>()(
               ? { ...t, completed: !t.completed, completedAt: !t.completed ? new Date().toISOString() : null }
               : t
           ),
+        }))
+        const { userId, tasks } = get()
+        if (userId) {
+          const updated = tasks.find((t) => t.id === id)
+          if (updated) syncTask(updated, userId)
+        }
+      },
+
+      toggleMyDay: (id) => {
+        set((s) => ({
+          tasks: s.tasks.map((t) => t.id === id ? { ...t, isMyDay: !t.isMyDay } : t),
+        }))
+        const { userId, tasks } = get()
+        if (userId) {
+          const updated = tasks.find((t) => t.id === id)
+          if (updated) syncTask(updated, userId)
+        }
+      },
+
+      toggleStarred: (id) => {
+        set((s) => ({
+          tasks: s.tasks.map((t) => t.id === id ? { ...t, isStarred: !t.isStarred } : t),
         }))
         const { userId, tasks } = get()
         if (userId) {
@@ -266,11 +292,13 @@ export const useStore = create<AppState>()(
       addProject: (partial) => {
         const project: Project = {
           id: uuid(),
-          name: partial.name || 'New Project',
+          name: partial.name || 'New Goal',
           color: partial.color || '#808080',
           icon: partial.icon || 'hash',
           order: get().projects.length,
           isFavorite: false,
+          areaId: partial.areaId ?? null,
+          dueDate: partial.dueDate ?? null,
         }
         set((s) => ({ projects: [...s.projects, project] }))
         const { userId } = get()
