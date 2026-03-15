@@ -702,24 +702,28 @@ No export or import functionality exists yet.
 ### Sidebar (`src/components/Sidebar.tsx`)
 **Role:** Primary navigation
 **Props:** none (reads from useStore)
+**Layout:** `flex-col h-full` — fixed top header, scrollable middle, fixed bottom panel
 **Sections (top to bottom):**
-1. **App logo** + "Get Done" title
-2. **User Profile pill** — shows name + "Signed in" (or Guest for local mode); hover reveals Sign Out
-3. **Search button** → sets view to `'search'`, shows `⌘K` hint
-4. **System Lists** (no section title):
+1. **App logo** + "Get Done" title (fixed, non-scrollable)
+2. **System Lists** (scrollable area, no section title):
    - My Day (`'myday'`) — badge: count of `isMyDay` tasks
    - Important (`'important'`) — badge: count of `isStarred` tasks
    - Upcoming (`'upcoming'`) — badge: tasks with a dueDate
    - Completed (`'completed'`) — no badge
    - Inbox (`'inbox'`) — badge: tasks where `projectId === null`
-5. **Life Areas** (label: "LIFE AREAS" + "+ New Goal" button):
+3. **Life Areas** (label: "LIFE AREAS" + "+ New Goal" button):
    - 6 fixed areas listed (Professional, Personal, Financial, Wellness, Relationship, Vision)
    - Each area is a collapsible row — click toggles Goals list beneath it
    - Goals under each area show task count badge
    - "Add goal" shortcut inside each expanded area
    - Goals without `areaId` show under "OTHER GOALS" section
-6. **Tools** (collapsible section): Habits, Pomodoro, 4 Quadrants, GTD
-7. **Theme toggle** (pinned to bottom): System / Light / Dark buttons
+4. **Tools** (collapsible section): Habits, Pomodoro, 4 Quadrants, GTD
+5. **Bottom Panel** (fixed, non-scrollable — `border-t`, `bg-surface-800`):
+   - **Theme panel** (shown when Settings expanded): System / Light / Dark buttons
+   - **Settings row** — clickable, toggles theme panel above it
+   - **User Profile pill** (very bottom) — shows name + "Signed in" (or Guest); hover reveals Sign Out
+
+**Removed:** Search button (no longer in sidebar — v2.1.1)
 
 **New Goal Modal** (inline in Sidebar.tsx):
 - Goal name (text input, required)
@@ -1363,6 +1367,7 @@ All changes to the application must be recorded here.
 | 2026-03-15 | 1.2.3 | AI Agent | Enhanced §14 Agent Task Workflow & To-Do Checklist with mandatory to-do list creation, specific git push checkpoints ("Git push main has main branch only"), SQL schema requirements, and comprehensive workflow guidelines. Added Step 6 with detailed to-do list requirements and example structure. |
 | 2026-03-15 | 2.0.0 | AI Agent | **Sidebar Redesign — Areas, Goals & Smart Lists.** Full sidebar overhaul: (1) Added User Profile pill at top showing name + signed-in status. (2) Replaced old Project/Label nav with 5 System Smart Lists: My Day, Important, Upcoming, Completed, Inbox — each with live badge counts. (3) Added Life Areas section with 6 fixed areas (Professional, Personal, Financial, Wellness, Relationship, Vision) — each expandable to reveal Goals. (4) Added Tools collapsible section (Habits, Pomodoro, 4 Quadrants, GTD). (5) Added "+ New Goal" button and modal (name, color, area, date). (6) Created new views: `MyDayView` (default home), `ImportantView`, `CompletedView`. (7) Added `isMyDay` and `isStarred` fields to `Task` type + `toggleMyDay` / `toggleStarred` store actions. (8) Added `areaId` and `dueDate` fields to `Project`/Goal type. (9) Added `Area` interface + `FIXED_AREAS` constant. (10) Added `'myday'`, `'important'`, `'completed'` to `ViewType`. (11) Updated `TaskItem` with star button (hover-visible, always visible when starred) and "Add to My Day" popup menu item. (12) Updated `supabase.ts` converters for all new fields. Files: `Sidebar.tsx`, `TaskItem.tsx`, `MyDayView.tsx`, `ImportantView.tsx`, `CompletedView.tsx`, `types/index.ts`, `store/useStore.ts`, `lib/supabase.ts`, `App.tsx`. SQL required: see Supabase schema section. |
 | 2026-03-15 | 2.1.0 | AI Agent | **TaskEditor Visual Redesign.** Completely redesigned `src/components/TaskEditor.tsx` for compact, organized layout with visual hierarchy: (1) **Header** — Clear "Edit Task"/"New Task" title with close button. (2) **Title & Description** — Always visible, large title input and expandable description. (3) **Essential Fields Section** — Clearly labeled with flag icon; 2-column grid: Due Date, Due Time, Priority (dropdown), Goal/Project (dropdown). Improved spacing with px-3 py-2.5 buttons, semi-transparent backgrounds (`bg-surface-700/50`), better hover states. (4) **Advanced Options Section** — Collapsible accordion with gradient header (`from-surface-700/50 to-primary-600/5`); includes: Labels (multi-select), Assignee, Reminder (date+time), Recurring (type + interval), Attachments, Subtasks. Smooth animations (`animate-fade-in`). (5) **Footer** — Improved Cancel/Save buttons with gradient button design (`from-primary-600 to-primary-500`), better contrast. (6) **Visual Improvements**: Removed cramped feel with better spacing (mb-5 pb-4 borders between sections), clearer field distinction via section headers with colored icons, consistent dropdown positioning, enhanced color scheme with gradient accents, improved typography (uppercase section labels, better font weights). (7) **Responsive** — Card-based layout on mobile/desktop, maintains usability. Updated §7 Components Reference to reflect new design. Build verified (npm run build successful). |
+| 2026-03-15 | 2.1.1 | AI Agent | **Sidebar Layout Refactor.** Three changes to `src/components/Sidebar.tsx`: (1) **Removed Search button** from top of sidebar. (2) **Moved User Profile pill** from top to bottom fixed panel (very bottom). (3) **Replaced standalone Theme toggle** with a **Settings row** in the bottom panel — clicking Settings expands a theme picker above it. Layout restructured to `flex-col` with scrollable middle and `flex-shrink-0` bottom panel. Build verified. Updated §7 Sidebar spec. |
 
 ---
 

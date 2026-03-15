@@ -1,9 +1,9 @@
 import { useStore } from '@/store/useStore'
 import {
   Sun, Star, Calendar, Inbox, CheckCircle2, Plus,
-  ChevronDown, ChevronRight, Search, ListTodo,
+  ChevronDown, ChevronRight, ListTodo,
   Timer, Grid3X3, Target, Sun as SunIcon,
-  Moon, Monitor, X
+  Moon, Monitor, X, Settings
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { ViewType, ThemeMode, FIXED_AREAS, PROJECT_COLORS } from '@/types'
@@ -149,6 +149,7 @@ export function Sidebar() {
   const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({})
   const [showNewGoal, setShowNewGoal] = useState(false)
   const [showTools, setShowTools] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const themeOptions: { value: ThemeMode; label: string; icon: any }[] = [
     { value: 'system', label: 'System', icon: Monitor },
@@ -165,6 +166,9 @@ export function Sidebar() {
   const importantCount = tasks.filter((t) => !t.completed && t.isStarred).length
   const upcomingCount = tasks.filter((t) => !t.completed && t.dueDate).length
   const inboxCount = tasks.filter((t) => !t.completed && !t.projectId).length
+
+  // Suppress unused var warning — today used for reference consistency
+  void today
 
   // ── System list items ──────────────────
   const systemItems = [
@@ -194,7 +198,7 @@ export function Sidebar() {
       icon: CheckCircle2,
       label: 'Completed',
       iconClassName: 'text-green-400',
-      badge: null, // hidden by default
+      badge: null,
     },
     {
       view: 'inbox' as ViewType,
@@ -215,272 +219,292 @@ export function Sidebar() {
 
   return (
     <>
-      <div className="flex flex-col h-full overflow-y-auto pb-0">
+      <div className="flex flex-col h-full overflow-hidden">
 
-        {/* ── User Profile ─────────────────── */}
-        <div className="px-4 pt-4 pb-3 border-b border-surface-700/60">
-          {/* App logo row */}
-          <div className="flex items-center gap-2 mb-3">
+        {/* ── App Logo ─────────────────────── */}
+        <div className="px-4 pt-4 pb-3 border-b border-surface-700/60 flex-shrink-0">
+          <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center flex-shrink-0">
               <ListTodo size={15} className="text-white" />
             </div>
             <span className="font-bold text-base tracking-tight">Get Done</span>
           </div>
-          {/* Profile pill */}
-          {userId ? (
-            <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-700/50 group">
-              <div className="w-7 h-7 rounded-full bg-primary-600/30 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-primary-400">A</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-surface-50 truncate leading-tight">Muhammed Ajmal</p>
-                <p className="text-[10px] text-surface-400 truncate leading-tight">Signed in</p>
-              </div>
-              <button
-                onClick={() => signOut()}
-                title="Sign out"
-                className="text-surface-500 hover:text-surface-200 transition-colors opacity-0 group-hover:opacity-100 text-[10px]"
-              >
-                Sign out
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-700/50">
-              <div className="w-7 h-7 rounded-full bg-surface-600 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-surface-400">G</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-surface-50 truncate leading-tight">Guest</p>
-                <p className="text-[10px] text-surface-400 truncate leading-tight">Local mode</p>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* ── Search ───────────────────────── */}
-        <div className="px-3 pt-3 pb-1">
-          <button
-            onClick={() => setView('search')}
-            className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm transition-colors
-              ${currentView === 'search'
-                ? 'bg-surface-700 text-surface-50'
-                : 'text-surface-400 hover:bg-surface-700/60 hover:text-surface-200'}`}
-          >
-            <Search size={15} />
-            <span>Search</span>
-            <kbd className="ml-auto text-[10px] text-surface-500 bg-surface-700 rounded px-1">⌘K</kbd>
-          </button>
-        </div>
+        {/* ── Scrollable Middle Content ─────── */}
+        <div className="flex-1 overflow-y-auto">
 
-        {/* ── System Lists ─────────────────── */}
-        <nav className="px-3 pt-2 space-y-0.5">
-          {systemItems.map(({ view, icon: Icon, label, iconClassName, badge }) => {
-            const isActive = currentView === view
-            return (
-              <button
-                key={view}
-                onClick={() => setView(view)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
-                  ${isActive
-                    ? 'bg-primary-600/20 text-primary-400 font-medium'
-                    : 'text-surface-200 hover:bg-surface-700/60'}`}
-              >
-                <Icon size={16} className={isActive ? 'text-primary-400' : iconClassName} />
-                <span className="flex-1 text-left truncate">{label}</span>
-                {badge !== null && badge > 0 && (
-                  <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full leading-none
-                    ${isActive ? 'bg-primary-600/30 text-primary-300' : 'bg-surface-700 text-surface-400'}`}>
-                    {badge}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </nav>
-
-        {/* ── Divider ──────────────────────── */}
-        <div className="mx-3 my-3 border-t border-surface-700/60" />
-
-        {/* ── Life Areas + Goals ───────────── */}
-        <div className="px-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-surface-500 uppercase tracking-widest px-1">Life Areas</span>
-            <button
-              onClick={() => setShowNewGoal(true)}
-              title="New Goal"
-              className="flex items-center gap-1 text-[11px] text-surface-500 hover:text-primary-400 transition-colors px-1 py-0.5 rounded"
-            >
-              <Plus size={13} />
-              <span>New Goal</span>
-            </button>
-          </div>
-
-          <div className="space-y-0.5">
-            {FIXED_AREAS.map((area) => {
-              const areaGoals = projects.filter((p) => p.areaId === area.id)
-              const isExpanded = expandedAreas[area.id] ?? false
-              const hasActiveGoal = areaGoals.some(
-                (g) => currentView === 'project' && currentProjectId === g.id
-              )
-
+          {/* ── System Lists ─────────────────── */}
+          <nav className="px-3 pt-3 space-y-0.5">
+            {systemItems.map(({ view, icon: Icon, label, iconClassName, badge }) => {
+              const isActive = currentView === view
               return (
-                <div key={area.id}>
-                  {/* Area header row */}
-                  <button
-                    onClick={() => toggleArea(area.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all
-                      ${hasActiveGoal && !isExpanded ? 'text-primary-400' : 'text-surface-300 hover:text-surface-50 hover:bg-surface-700/50'}`}
-                  >
-                    <span className="text-base leading-none">{area.emoji}</span>
-                    <span className="flex-1 text-left text-sm font-medium truncate">{area.name}</span>
-                    {areaGoals.length > 0 && (
-                      <span className="text-[10px] text-surface-500 mr-1">{areaGoals.length}</span>
-                    )}
-                    {isExpanded
-                      ? <ChevronDown size={13} className="text-surface-500 flex-shrink-0" />
-                      : <ChevronRight size={13} className="text-surface-500 flex-shrink-0" />
-                    }
-                  </button>
-
-                  {/* Goals under this area */}
-                  {isExpanded && (
-                    <div className="ml-3 mt-0.5 space-y-0.5 border-l border-surface-700/60 pl-2">
-                      {areaGoals.length === 0 ? (
-                        <p className="text-[11px] text-surface-500 py-1.5 px-2 italic">No goals yet</p>
-                      ) : (
-                        areaGoals
-                          .sort((a, b) => a.order - b.order)
-                          .map((goal) => {
-                            const isGoalActive = currentView === 'project' && currentProjectId === goal.id
-                            const goalTaskCount = tasks.filter(
-                              (t) => t.projectId === goal.id && !t.completed
-                            ).length
-                            return (
-                              <button
-                                key={goal.id}
-                                onClick={() => setView('project', goal.id)}
-                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all
-                                  ${isGoalActive
-                                    ? 'bg-primary-600/20 text-primary-400 font-medium'
-                                    : 'text-surface-300 hover:bg-surface-700/50 hover:text-surface-50'}`}
-                              >
-                                <span
-                                  className="w-2 h-2 rounded-full flex-shrink-0"
-                                  style={{ backgroundColor: goal.color }}
-                                />
-                                <span className="flex-1 text-left truncate text-sm">{goal.name}</span>
-                                {goalTaskCount > 0 && (
-                                  <span className={`text-[11px] px-1 leading-none
-                                    ${isGoalActive ? 'text-primary-300' : 'text-surface-500'}`}>
-                                    {goalTaskCount}
-                                  </span>
-                                )}
-                              </button>
-                            )
-                          })
-                      )}
-                      {/* Add goal to this area shortcut */}
-                      <button
-                        onClick={() => setShowNewGoal(true)}
-                        className="flex items-center gap-1.5 px-2 py-1 w-full text-[11px] text-surface-500 hover:text-primary-400 transition-colors rounded"
-                      >
-                        <Plus size={11} />
-                        Add goal
-                      </button>
-                    </div>
+                <button
+                  key={view}
+                  onClick={() => setView(view)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
+                    ${isActive
+                      ? 'bg-primary-600/20 text-primary-400 font-medium'
+                      : 'text-surface-200 hover:bg-surface-700/60'}`}
+                >
+                  <Icon size={16} className={isActive ? 'text-primary-400' : iconClassName} />
+                  <span className="flex-1 text-left truncate">{label}</span>
+                  {badge !== null && badge > 0 && (
+                    <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full leading-none
+                      ${isActive ? 'bg-primary-600/30 text-primary-300' : 'bg-surface-700 text-surface-400'}`}>
+                      {badge}
+                    </span>
                   )}
-                </div>
+                </button>
               )
             })}
+          </nav>
 
-            {/* Goals without a specific area */}
-            {projects.filter((p) => !p.areaId).length > 0 && (
-              <div className="mt-1">
-                <p className="text-[10px] text-surface-500 px-2 py-1 uppercase tracking-widest">Other Goals</p>
-                {projects
-                  .filter((p) => !p.areaId)
-                  .sort((a, b) => a.order - b.order)
-                  .map((goal) => {
-                    const isGoalActive = currentView === 'project' && currentProjectId === goal.id
-                    const goalTaskCount = tasks.filter((t) => t.projectId === goal.id && !t.completed).length
-                    return (
-                      <button
-                        key={goal.id}
-                        onClick={() => setView('project', goal.id)}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
-                          ${isGoalActive
-                            ? 'bg-primary-600/20 text-primary-400 font-medium'
-                            : 'text-surface-200 hover:bg-surface-700/60'}`}
-                      >
-                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: goal.color }} />
-                        <span className="flex-1 text-left truncate">{goal.name}</span>
-                        {goalTaskCount > 0 && (
-                          <span className="text-[11px] text-surface-500">{goalTaskCount}</span>
+          {/* ── Divider ──────────────────────── */}
+          <div className="mx-3 my-3 border-t border-surface-700/60" />
+
+          {/* ── Life Areas + Goals ───────────── */}
+          <div className="px-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-bold text-surface-500 uppercase tracking-widest px-1">Life Areas</span>
+              <button
+                onClick={() => setShowNewGoal(true)}
+                title="New Goal"
+                className="flex items-center gap-1 text-[11px] text-surface-500 hover:text-primary-400 transition-colors px-1 py-0.5 rounded"
+              >
+                <Plus size={13} />
+                <span>New Goal</span>
+              </button>
+            </div>
+
+            <div className="space-y-0.5">
+              {FIXED_AREAS.map((area) => {
+                const areaGoals = projects.filter((p) => p.areaId === area.id)
+                const isExpanded = expandedAreas[area.id] ?? false
+                const hasActiveGoal = areaGoals.some(
+                  (g) => currentView === 'project' && currentProjectId === g.id
+                )
+
+                return (
+                  <div key={area.id}>
+                    {/* Area header row */}
+                    <button
+                      onClick={() => toggleArea(area.id)}
+                      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all
+                        ${hasActiveGoal && !isExpanded ? 'text-primary-400' : 'text-surface-300 hover:text-surface-50 hover:bg-surface-700/50'}`}
+                    >
+                      <span className="text-base leading-none">{area.emoji}</span>
+                      <span className="flex-1 text-left text-sm font-medium truncate">{area.name}</span>
+                      {areaGoals.length > 0 && (
+                        <span className="text-[10px] text-surface-500 mr-1">{areaGoals.length}</span>
+                      )}
+                      {isExpanded
+                        ? <ChevronDown size={13} className="text-surface-500 flex-shrink-0" />
+                        : <ChevronRight size={13} className="text-surface-500 flex-shrink-0" />
+                      }
+                    </button>
+
+                    {/* Goals under this area */}
+                    {isExpanded && (
+                      <div className="ml-3 mt-0.5 space-y-0.5 border-l border-surface-700/60 pl-2">
+                        {areaGoals.length === 0 ? (
+                          <p className="text-[11px] text-surface-500 py-1.5 px-2 italic">No goals yet</p>
+                        ) : (
+                          areaGoals
+                            .sort((a, b) => a.order - b.order)
+                            .map((goal) => {
+                              const isGoalActive = currentView === 'project' && currentProjectId === goal.id
+                              const goalTaskCount = tasks.filter(
+                                (t) => t.projectId === goal.id && !t.completed
+                              ).length
+                              return (
+                                <button
+                                  key={goal.id}
+                                  onClick={() => setView('project', goal.id)}
+                                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all
+                                    ${isGoalActive
+                                      ? 'bg-primary-600/20 text-primary-400 font-medium'
+                                      : 'text-surface-300 hover:bg-surface-700/50 hover:text-surface-50'}`}
+                                >
+                                  <span
+                                    className="w-2 h-2 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: goal.color }}
+                                  />
+                                  <span className="flex-1 text-left truncate text-sm">{goal.name}</span>
+                                  {goalTaskCount > 0 && (
+                                    <span className={`text-[11px] px-1 leading-none
+                                      ${isGoalActive ? 'text-primary-300' : 'text-surface-500'}`}>
+                                      {goalTaskCount}
+                                    </span>
+                                  )}
+                                </button>
+                              )
+                            })
                         )}
-                      </button>
-                    )
-                  })}
+                        {/* Add goal shortcut */}
+                        <button
+                          onClick={() => setShowNewGoal(true)}
+                          className="flex items-center gap-1.5 px-2 py-1 w-full text-[11px] text-surface-500 hover:text-primary-400 transition-colors rounded"
+                        >
+                          <Plus size={11} />
+                          Add goal
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+
+              {/* Goals without a specific area */}
+              {projects.filter((p) => !p.areaId).length > 0 && (
+                <div className="mt-1">
+                  <p className="text-[10px] text-surface-500 px-2 py-1 uppercase tracking-widest">Other Goals</p>
+                  {projects
+                    .filter((p) => !p.areaId)
+                    .sort((a, b) => a.order - b.order)
+                    .map((goal) => {
+                      const isGoalActive = currentView === 'project' && currentProjectId === goal.id
+                      const goalTaskCount = tasks.filter((t) => t.projectId === goal.id && !t.completed).length
+                      return (
+                        <button
+                          key={goal.id}
+                          onClick={() => setView('project', goal.id)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
+                            ${isGoalActive
+                              ? 'bg-primary-600/20 text-primary-400 font-medium'
+                              : 'text-surface-200 hover:bg-surface-700/60'}`}
+                        >
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: goal.color }} />
+                          <span className="flex-1 text-left truncate">{goal.name}</span>
+                          {goalTaskCount > 0 && (
+                            <span className="text-[11px] text-surface-500">{goalTaskCount}</span>
+                          )}
+                        </button>
+                      )
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Divider ──────────────────────── */}
+          <div className="mx-3 my-3 border-t border-surface-700/60" />
+
+          {/* ── Tools (collapsible) ───────────── */}
+          <div className="px-3 mb-3">
+            <button
+              onClick={() => setShowTools(!showTools)}
+              className="flex items-center gap-2 w-full mb-1.5"
+            >
+              <span className="text-[10px] font-bold text-surface-500 uppercase tracking-widest flex-1 text-left px-1">Tools</span>
+              {showTools
+                ? <ChevronDown size={13} className="text-surface-500" />
+                : <ChevronRight size={13} className="text-surface-500" />
+              }
+            </button>
+            {showTools && (
+              <div className="space-y-0.5">
+                {toolItems.map(({ view, icon: Icon, label }) => {
+                  const isActive = currentView === view
+                  return (
+                    <button
+                      key={view}
+                      onClick={() => setView(view)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
+                        ${isActive
+                          ? 'bg-primary-600/20 text-primary-400 font-medium'
+                          : 'text-surface-300 hover:bg-surface-700/60 hover:text-surface-50'}`}
+                    >
+                      <Icon size={15} />
+                      <span>{label}</span>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
-        </div>
 
-        {/* ── Divider ──────────────────────── */}
-        <div className="mx-3 my-3 border-t border-surface-700/60" />
+        </div>{/* end scrollable content */}
 
-        {/* ── Tools (collapsible) ───────────── */}
-        <div className="px-3 mb-2">
-          <button
-            onClick={() => setShowTools(!showTools)}
-            className="flex items-center gap-2 w-full mb-1.5"
-          >
-            <span className="text-[10px] font-bold text-surface-500 uppercase tracking-widest flex-1 text-left px-1">Tools</span>
-            {showTools
-              ? <ChevronDown size={13} className="text-surface-500" />
-              : <ChevronRight size={13} className="text-surface-500" />
-            }
-          </button>
-          {showTools && (
-            <div className="space-y-0.5">
-              {toolItems.map(({ view, icon: Icon, label }) => {
-                const isActive = currentView === view
-                return (
+        {/* ── Bottom Panel: Settings + User ─── */}
+        <div className="flex-shrink-0 border-t border-surface-700/60 bg-surface-800">
+
+          {/* Theme picker — visible when Settings expanded */}
+          {showSettings && (
+            <div className="px-3 pt-3 pb-1">
+              <p className="text-[10px] font-bold text-surface-500 uppercase tracking-widest px-1 mb-1.5">Theme</p>
+              <div className="flex items-center gap-1">
+                {themeOptions.map(({ value, label, icon: Icon }) => (
                   <button
-                    key={view}
-                    onClick={() => setView(view)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
-                      ${isActive
-                        ? 'bg-primary-600/20 text-primary-400 font-medium'
-                        : 'text-surface-300 hover:bg-surface-700/60 hover:text-surface-50'}`}
+                    key={value}
+                    onClick={() => setTheme(value)}
+                    title={label}
+                    className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg text-[10px] transition-colors
+                      ${theme === value
+                        ? 'bg-primary-600/20 text-primary-400'
+                        : 'text-surface-500 hover:bg-surface-700/60 hover:text-surface-200'}`}
                   >
-                    <Icon size={15} />
+                    <Icon size={14} />
                     <span>{label}</span>
                   </button>
-                )
-              })}
+                ))}
+              </div>
+              <div className="mt-2 border-t border-surface-700/40" />
             </div>
           )}
-        </div>
 
-        {/* ── Theme toggle — pinned to bottom ── */}
-        <div className="mt-auto sticky bottom-0 bg-surface-800 border-t border-surface-700/60 px-3 py-2">
-          <div className="flex items-center gap-1">
-            {themeOptions.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => setTheme(value)}
-                title={label}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg text-[10px] transition-colors
-                  ${theme === value
-                    ? 'bg-primary-600/20 text-primary-400'
-                    : 'text-surface-500 hover:bg-surface-700/60 hover:text-surface-200'}`}
-              >
-                <Icon size={14} />
-                <span>{label}</span>
-              </button>
-            ))}
+          {/* Settings row */}
+          <div className="px-3 pt-2 pb-1">
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all
+                ${showSettings
+                  ? 'bg-surface-700/60 text-surface-200'
+                  : 'text-surface-400 hover:bg-surface-700/60 hover:text-surface-200'}`}
+            >
+              <Settings size={15} />
+              <span className="flex-1 text-left">Settings</span>
+              {showSettings
+                ? <ChevronDown size={13} className="text-surface-500" />
+                : <ChevronRight size={13} className="text-surface-500" />
+              }
+            </button>
           </div>
-        </div>
+
+          {/* User profile pill */}
+          <div className="px-3 pb-3 pt-1">
+            {userId ? (
+              <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-700/50 group">
+                <div className="w-7 h-7 rounded-full bg-primary-600/30 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-primary-400">A</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-surface-50 truncate leading-tight">Muhammed Ajmal</p>
+                  <p className="text-[10px] text-surface-400 truncate leading-tight">Signed in</p>
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  title="Sign out"
+                  className="text-surface-500 hover:text-surface-200 transition-colors opacity-0 group-hover:opacity-100 text-[10px]"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-700/50">
+                <div className="w-7 h-7 rounded-full bg-surface-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-surface-400">G</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-surface-50 truncate leading-tight">Guest</p>
+                  <p className="text-[10px] text-surface-400 truncate leading-tight">Local mode</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>{/* end bottom panel */}
+
       </div>
 
       {/* New Goal Modal */}
