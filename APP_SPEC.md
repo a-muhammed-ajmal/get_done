@@ -783,25 +783,38 @@ No export or import functionality exists yet.
   defaultGtdContext?: GtdContext
 }
 ```
-**Fields:**
-- Title (required)
-- Description
-- Due date + due time (date picker + time picker)
-- Priority (1-4 dropdown)
-- Project (dropdown)
-- Labels (multi-select dropdown)
-- Assignee (text input)
-- Reminder (date + time picker, clearable)
-- Recurring (daily/weekly/monthly/yearly with interval)
-- File attachments (file picker, shows name + size, removable)
-- Sub-tasks (inline add, shows existing subtasks when editing)
+**Layout (Redesigned — v2.1.0):**
+- **Header** — Title ("Edit Task" / "New Task") + close button (X icon, top-right)
+- **Title & Description** — Always visible: large title input ("What needs to be done?") + expandable description textarea. Clear visual separation with border below.
+- **Essential Fields Section** — Clearly labeled with Flag icon + "ESSENTIAL" heading (uppercase). 2-column grid (responsive):
+  - Due Date (date picker, "Due Date" label)
+  - Due Time (time picker, "Time" label)
+  - Priority (dropdown, "Priority" label, shows P1-4 with color-coded flag)
+  - Goal (dropdown, "Goal" label, shows project color dot + name or "Inbox")
+  - Improved spacing: `px-3 py-2.5` padding, semi-transparent backgrounds (`bg-surface-700/50`), hover state (`hover:bg-surface-700`), smooth transitions
+  - Better visual distinction via section headers and colored icons
+- **Advanced Options Section** — Collapsible accordion button with gradient background (`from-surface-700/50 to-primary-600/5`), Tag icon, "ADVANCED" heading (uppercase). Chevron icon rotates on expand.
+  - When expanded (smooth `animate-fade-in`):
+    - **Labels** — Multi-select dropdown, shows count of selected labels
+    - **Assignee** — Text input ("Assign to...")
+    - **Reminder** — Date + time picker, clearable (X button)
+    - **Recurring** — Type buttons (Daily/Weekly/Monthly/Yearly) + interval number input, shows "Repeats [type]" when set
+    - **Attachments** — File picker with "+ Add" button, shows attached files with name + size + delete button
+    - **Subtasks** — Shows existing subtasks as read-only items, "Add a sub-task..." input with Enter keyboard support
+- **Footer** — Two buttons: Cancel (left, text hover), Save/Add Task (right, gradient `from-primary-600 to-primary-500`, hover gradient lighter, disabled state opacity-40)
+**Spacing & Typography:**
+- Section borders (1px `border-surface-700`) with `mb-5 pb-4` padding for clear separation
+- Field labels: `text-xs font-semibold text-surface-300 uppercase tracking-wide`
+- Inputs: `bg-transparent text-surface-50 placeholder:text-surface-500 outline-none` (no border, clean aesthetic)
+- Dropdowns: styled as inline selectors, not separate from buttons, consistent color scheme
 **Behavior:**
 - Auto-focuses title input on open
 - Validates: title must not be empty
-- On save: calls addTask or updateTask with all fields
+- On save: calls addTask or updateTask with all fields (including new fields: attachments, reminder, recurring, assignee)
 - Subtasks can be added inline (Enter to add when editing existing task)
 - File attachments stored as base64 data URLs
-- On backdrop click or Cancel button: calls onClose
+- Recurring interval is numeric (1-99)
+- On backdrop click or Cancel button: calls onClose (no unsaved changes warning at this stage)
 
 ---
 
@@ -1349,6 +1362,7 @@ All changes to the application must be recorded here.
 | 2026-03-15 | 1.2.2 | AI Agent | Configured Supabase credentials in `.env` file. Updated §6 Database/Backend status to "CREDENTIALS CONFIGURED — Database Schema Required". |
 | 2026-03-15 | 1.2.3 | AI Agent | Enhanced §14 Agent Task Workflow & To-Do Checklist with mandatory to-do list creation, specific git push checkpoints ("Git push main has main branch only"), SQL schema requirements, and comprehensive workflow guidelines. Added Step 6 with detailed to-do list requirements and example structure. |
 | 2026-03-15 | 2.0.0 | AI Agent | **Sidebar Redesign — Areas, Goals & Smart Lists.** Full sidebar overhaul: (1) Added User Profile pill at top showing name + signed-in status. (2) Replaced old Project/Label nav with 5 System Smart Lists: My Day, Important, Upcoming, Completed, Inbox — each with live badge counts. (3) Added Life Areas section with 6 fixed areas (Professional, Personal, Financial, Wellness, Relationship, Vision) — each expandable to reveal Goals. (4) Added Tools collapsible section (Habits, Pomodoro, 4 Quadrants, GTD). (5) Added "+ New Goal" button and modal (name, color, area, date). (6) Created new views: `MyDayView` (default home), `ImportantView`, `CompletedView`. (7) Added `isMyDay` and `isStarred` fields to `Task` type + `toggleMyDay` / `toggleStarred` store actions. (8) Added `areaId` and `dueDate` fields to `Project`/Goal type. (9) Added `Area` interface + `FIXED_AREAS` constant. (10) Added `'myday'`, `'important'`, `'completed'` to `ViewType`. (11) Updated `TaskItem` with star button (hover-visible, always visible when starred) and "Add to My Day" popup menu item. (12) Updated `supabase.ts` converters for all new fields. Files: `Sidebar.tsx`, `TaskItem.tsx`, `MyDayView.tsx`, `ImportantView.tsx`, `CompletedView.tsx`, `types/index.ts`, `store/useStore.ts`, `lib/supabase.ts`, `App.tsx`. SQL required: see Supabase schema section. |
+| 2026-03-15 | 2.1.0 | AI Agent | **TaskEditor Visual Redesign.** Completely redesigned `src/components/TaskEditor.tsx` for compact, organized layout with visual hierarchy: (1) **Header** — Clear "Edit Task"/"New Task" title with close button. (2) **Title & Description** — Always visible, large title input and expandable description. (3) **Essential Fields Section** — Clearly labeled with flag icon; 2-column grid: Due Date, Due Time, Priority (dropdown), Goal/Project (dropdown). Improved spacing with px-3 py-2.5 buttons, semi-transparent backgrounds (`bg-surface-700/50`), better hover states. (4) **Advanced Options Section** — Collapsible accordion with gradient header (`from-surface-700/50 to-primary-600/5`); includes: Labels (multi-select), Assignee, Reminder (date+time), Recurring (type + interval), Attachments, Subtasks. Smooth animations (`animate-fade-in`). (5) **Footer** — Improved Cancel/Save buttons with gradient button design (`from-primary-600 to-primary-500`), better contrast. (6) **Visual Improvements**: Removed cramped feel with better spacing (mb-5 pb-4 borders between sections), clearer field distinction via section headers with colored icons, consistent dropdown positioning, enhanced color scheme with gradient accents, improved typography (uppercase section labels, better font weights). (7) **Responsive** — Card-based layout on mobile/desktop, maintains usability. Updated §7 Components Reference to reflect new design. Build verified (npm run build successful). |
 
 ---
 
